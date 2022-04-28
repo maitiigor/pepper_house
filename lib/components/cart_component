@@ -1,0 +1,20 @@
+import 'package:flutter/material.dart';
+
+class CartWidget extends InheritedWidget {
+  const CartWidget({
+    Key? key,
+    required this.count,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  final String count;
+
+  static CartWidget of(BuildContext context) {
+    final CartWidget? result = context.dependOnInheritedWidgetOfExactType<CartWidget>();
+    assert(result != null, 'No FrogColor found in context');
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(CartWidget old) => color != old.color;
+}
