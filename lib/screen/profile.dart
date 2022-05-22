@@ -44,6 +44,8 @@ class _ProfilePageState extends State<ProfilePage> {
   setUserData() {
     _nameField.text = _currentUser.displayName!;
     _emailField.text = _currentUser.email!;
+    _phoneNumberField.text = _currentUser.phoneNumber!;
+    _addressField.text = _currentUser.address!;
     uid = _currentUser.uid;
   }
 
@@ -230,12 +232,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                       }
                                       _isSubmitting = false;
                                       setState(() {});
-                                      await Future.delayed(const Duration(milliseconds: 3000), (() {
-                                         errorMessage =
-                                            '';
-                                            setState(() {
-                                              
-                                            });
+                                      await Future.delayed(
+                                          const Duration(milliseconds: 3000),
+                                          (() {
+                                        errorMessage = '';
+                                        setState(() {});
                                       }));
                                     }
                                   },
@@ -254,7 +255,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      
                       const Padding(
                         padding: EdgeInsets.all(20),
                         child: Text("Change Password",
@@ -333,18 +333,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                         errorMessage =
                                             'Password updated successfully';
                                         _passwordConfirmField.text = '';
-                                      }else{
-                                         errorMessage =
+                                      } else {
+                                        errorMessage =
                                             'Sorry something went wrong';
                                       }
                                       _isSubmitting = false;
                                       setState(() {});
-                                      await Future.delayed(const Duration(milliseconds: 3000), (() {
-                                         errorMessage =
-                                            '';
-                                            setState(() {
-                                              
-                                            });
+                                      await Future.delayed(
+                                          const Duration(milliseconds: 3000),
+                                          (() {
+                                        errorMessage = '';
+                                        setState(() {});
                                       }));
                                     }
                                   },

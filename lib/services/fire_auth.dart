@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pepper_house/models/user_model.dart';
@@ -7,6 +8,7 @@ import '../exemption-handlers/auth_exemption_handler.dart';
 
 class FireAuth {
   FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<AuthResultStatus> registerUsingEmailPassword({
     required String name,
@@ -24,11 +26,16 @@ class FireAuth {
       );
       if (userCredential.user != null) {
         _status = AuthResultStatus.successful;
+        _db.collection('users').doc(userCredential.user!.uid).set({
+          "user_id": userCredential.user!.uid,
+          "email": email,
+          "name": name,
+        });
       } else {
         _status = AuthResultStatus.undefined;
       }
       user = userCredential.user;
-      await user!.updatePhotoURL(name);
+      await user!.updateDisplayName(name);
       await user.reload();
       user = _auth.currentUser;
     } on FirebaseAuthException catch (e) {
@@ -76,15 +83,14 @@ class FireAuth {
 
   Future<UserModel> getUser() async {
     var authUser = _auth.currentUser!;
-
-    return UserModel(
-        uid: authUser.uid,
-        email: authUser.email.toString(),
-        displayName: authUser.displayName,
-        photoURL: authUser.photoURL);
+    DocumentSnapshot<Map<String, dynamic>> doc = await _db.collection('users').doc(authUser.uid).get();
+ 
+    
+    return UserModel.fromDocumentSnapshot(doc);
   }
 
-  Future<String> updateUser({required name, required phoneNumber}) async {
+  Future<String> updateUser(
+      {required name, required phoneNumber, address}) async {
     String message = "success";
     var currentUser = _auth.currentUser!;
     /*  await _auth.verifyPhoneNumber(
@@ -95,6 +101,13 @@ class FireAuth {
         codeAutoRetrievalTimeout: (String verificationId) {},
     ); */
     //print(phoneNumber);
+    _db.collection('users').doc(currentUser.uid).update({
+      "full_name": name,
+      "phone_number": phoneNumber,
+      "address": address,
+  
+    });
+
     try {
       await currentUser.updateDisplayName(name);
       if (currentUser.displayName != name) {
