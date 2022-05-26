@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pepper_house/locator.dart';
+import 'package:pepper_house/models/menu_category_model.dart';
 import 'package:pepper_house/models/quantity_controller_model.dart';
 import 'package:pepper_house/models/user_model.dart';
 import 'package:pepper_house/repository/cart_repo.dart';
+import 'package:pepper_house/repository/menu_category_repo.dart';
 import 'package:pepper_house/repository/menu_repo.dart';
 import 'package:pepper_house/screen/food_detail.dart';
+import 'package:pepper_house/screen/menu_by_category.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import '../controller/user_controller.dart';
@@ -28,11 +31,13 @@ class _HomePageState extends State<HomePage> {
   final UserModel _currentUser = locator.get<UserController>().currentUser;
   Future<List<Menu>>? _menuList;
   List<Menu>? _retrievedMenuList;
+  List<MenuCategory> _menuCategoryList = [];
   /* final String _cartCount = locator.get<String>(); */
 
   Future<void> _initRetrival() async {
     _menuList = locator.get<MenuRepository>().retrieveMenu();
     _retrievedMenuList = await locator.get<MenuRepository>().retrieveMenu();
+   
   }
 
   /*  String? _username = '';
@@ -41,8 +46,8 @@ class _HomePageState extends State<HomePage> {
   var _fullName; */
   @override
   void initState() {
-    super.initState();
     _initRetrival();
+    super.initState();
   }
 
   @override
@@ -89,13 +94,13 @@ class _HomePageState extends State<HomePage> {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                          context.watch<CartRepo>().countCart,
-                          style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500),
-                                ),
-                          
+                            context.watch<CartRepo>().countCart,
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500),
+                          ),
+
                           /*  child: Text(
                               _cartCount,
                               style: const TextStyle(
@@ -154,35 +159,74 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          GridView.count(
-            scrollDirection: Axis.vertical,
-            crossAxisCount: 5,
-            childAspectRatio: 0.8,
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(2),
-            children: List.generate(5, (index) {
-              return Stack(
-                fit: StackFit.loose,
-                alignment: Alignment.topCenter,
-                children: [
-                  Card(
-                    child: SizedBox(
-                      height: 60,
-                      child: Image.asset("asset/images/logo.jpeg"),
-                    ),
-                    elevation: 5,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(top: 70),
-                    child: const Text(
-                      "Rice",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  )
-                ],
-              );
-            }),
-          ),
+          FutureBuilder(
+            future: locator.get<MenuCategoryRepository>().retieveMenuCategory(),
+            builder: (context, AsyncSnapshot<List<MenuCategory>> snapshot) {       
+              if(snapshot.hasData && snapshot.data!.isNotEmpty){
+                _menuCategoryList = snapshot.data!;
+                return SizedBox(
+              height: 80,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _menuCategoryList.length,
+                    itemBuilder: ((context, index) {
+                      return Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: SizedBox(
+                            width: 80,
+                            height: 150,
+                            child: Column(
+                              children: [
+                                Card(
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Container(
+                                    height: 50,
+                                    width: 80,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.rectangle,
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: (() {
+                                        pushNewScreen(
+                                          context,
+                                          screen: MenuByCategory(
+                                              category: _menuCategoryList[index]),
+                                          withNavBar:
+                                              true, // OPTIONAL VALUE. True by default.
+                                          pageTransitionAnimation:
+                                              PageTransitionAnimation.cupertino,
+                                        );
+                                      }),
+                                      child: Image.asset(
+                                        "asset/images/logo.jpeg",
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  child: Text(
+                                    _menuCategoryList[index].categoryName,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ));
+                    })),
+              ));
+              }else{
+                return const CircularProgressIndicator();
+              }
+          },),
           const Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -215,7 +259,7 @@ class _HomePageState extends State<HomePage> {
                               pushNewScreen(
                                 context,
                                 screen: FoodDetailPage(
-                                menu: _retrievedMenuList![index]),
+                                    menu: _retrievedMenuList![index]),
                                 withNavBar:
                                     true, // OPTIONAL VALUE. True by default.
                                 pageTransitionAnimation:
@@ -382,36 +426,49 @@ class _HomePageState extends State<HomePage> {
                         scrollDirection: Axis.horizontal,
                         itemCount: _retrievedMenuList!.length,
                         itemBuilder: (context, index) {
-                          return Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            elevation: 5,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Align(
-                                  child: SizedBox(
-                                      height: 120,
-                                      width: 150,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CachedNetworkImage(
-                                            fit: BoxFit.cover,
-                                            progressIndicatorBuilder:
-                                                (context, url, progress) {
-                                              return const Align(
-                                                  alignment: Alignment.center,
-                                                  child: SizedBox(
-                                                      height: 30,
-                                                      width: 30,
-                                                      child:
-                                                          CircularProgressIndicator()));
-                                            },
-                                            imageUrl: _retrievedMenuList![index]
-                                                .imageUrl),
-                                      )
-                                      /*  child: Image.network(
+                          return GestureDetector(
+                            onTap: () {
+                              pushNewScreen(
+                                context,
+                                screen: FoodDetailPage(
+                                    menu: _retrievedMenuList![index]),
+                                withNavBar:
+                                    true, // OPTIONAL VALUE. True by default.
+                                pageTransitionAnimation:
+                                    PageTransitionAnimation.cupertino,
+                              );
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              elevation: 5,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Align(
+                                    child: SizedBox(
+                                        height: 120,
+                                        width: 150,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8),
+                                          child: CachedNetworkImage(
+                                              fit: BoxFit.cover,
+                                              progressIndicatorBuilder:
+                                                  (context, url, progress) {
+                                                return const Align(
+                                                    alignment: Alignment.center,
+                                                    child: SizedBox(
+                                                        height: 30,
+                                                        width: 30,
+                                                        child:
+                                                            CircularProgressIndicator()));
+                                              },
+                                              imageUrl:
+                                                  _retrievedMenuList![index]
+                                                      .imageUrl),
+                                        )
+                                        /*  child: Image.network(
                                         _retrievedMenuList![index].imageUrl,
                                         loadingBuilder:
                                             (context, child, loadingProgress) {
@@ -429,133 +486,72 @@ class _HomePageState extends State<HomePage> {
                                         },
                                         fit: BoxFit.cover,
                                       ), */
-                                      ),
-                                ),
-                                Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 25, vertical: 5),
-                                        child: Text(
-                                          _retrievedMenuList![index].name,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ))),
-                                Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 25,
-                                      ),
-                                      child: RichText(
-                                          text: const TextSpan(children: [
-                                        WidgetSpan(
-                                            child: Icon(
-                                          Icons.star,
-                                          color: Colors.red,
-                                          size: 18,
-                                        )),
-                                        WidgetSpan(
-                                            child: Icon(
-                                          Icons.star,
-                                          color: Colors.red,
-                                          size: 18,
-                                        )),
-                                        WidgetSpan(
-                                            child: Icon(
-                                          Icons.star,
-                                          color: Colors.red,
-                                          size: 18,
-                                        )),
-                                        WidgetSpan(
-                                            child: Icon(
-                                          Icons.star,
-                                          color: Colors.red,
-                                          size: 18,
-                                        )),
-                                        WidgetSpan(
-                                            child: Icon(
-                                          Icons.star_outline,
-                                          color: Colors.red,
-                                          size: 18,
-                                        ))
-                                      ])),
-                                    )),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 25,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(_retrievedMenuList![index].price),
-                                      SizedBox(
-                                        width: 80,
-                                        height: 30,
-                                        child: TextField(
-                                          textAlign: TextAlign.center,
-                                          enableInteractiveSelection: false,
-                                          showCursor: false,
-                                          controller: txt,
-                                          decoration: InputDecoration(
-                                            prefix: GestureDetector(
-                                              onTap: () {
-                                                int num = txt.text.isEmpty
-                                                    ? 0
-                                                    : int.parse(txt.text);
-                                                if (num >= 1) {
-                                                  var val = num--;
-                                                  txt.selection = TextSelection
-                                                      .fromPosition(
-                                                          TextPosition(
-                                                              offset: txt.text
-                                                                  .length));
-                                                  txt.text = val.toString();
-                                                }
-                                              },
-                                              child: const Icon(
-                                                Icons.remove,
-                                                size: 16,
-                                              ),
-                                            ),
-                                            suffix: GestureDetector(
-                                              onTap: () {
-                                                int val;
-                                                if (txt.text.isEmpty) {
-                                                  val = 1;
-                                                  txt.text = val.toString();
-                                                } else {
-                                                  val = int.parse(txt.text);
-                                                  val++;
-                                                  txt.selection = TextSelection
-                                                      .fromPosition(
-                                                          TextPosition(
-                                                              offset: txt.text
-                                                                  .length));
-                                                  txt.text = val.toString();
-                                                }
-                                              },
-                                              child: const Icon(
-                                                Icons.add,
-                                                size: 16,
-                                              ),
-                                            ),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                              borderSide: const BorderSide(
-                                                  color: Colors.red, width: 2),
-                                            ),
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          // Only numbers can be entered
                                         ),
-                                      ),
-                                    ],
                                   ),
-                                )
-                              ],
+                                  Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 25, vertical: 5),
+                                          child: Text(
+                                            _retrievedMenuList![index].name,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ))),
+                                  Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 25,
+                                        ),
+                                        child: RichText(
+                                            text: const TextSpan(children: [
+                                          WidgetSpan(
+                                              child: Icon(
+                                            Icons.star,
+                                            color: Colors.red,
+                                            size: 18,
+                                          )),
+                                          WidgetSpan(
+                                              child: Icon(
+                                            Icons.star,
+                                            color: Colors.red,
+                                            size: 18,
+                                          )),
+                                          WidgetSpan(
+                                              child: Icon(
+                                            Icons.star,
+                                            color: Colors.red,
+                                            size: 18,
+                                          )),
+                                          WidgetSpan(
+                                              child: Icon(
+                                            Icons.star,
+                                            color: Colors.red,
+                                            size: 18,
+                                          )),
+                                          WidgetSpan(
+                                              child: Icon(
+                                            Icons.star_outline,
+                                            color: Colors.red,
+                                            size: 18,
+                                          ))
+                                        ])),
+                                      )),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 25,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(_retrievedMenuList![index].price),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           );
                         }),
@@ -584,7 +580,7 @@ class _HomePageState extends State<HomePage> {
                               height: 50, child: CircularProgressIndicator())));
                 }
               }),
-          Row(
+          /* Row(
             children: [
               Container(
                   padding:
@@ -634,7 +630,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   )),
             ],
-          ),
+          ), */
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pepper_house/controller/user_controller.dart';
 import 'package:pepper_house/locator.dart';
 import 'package:pepper_house/repository/shared_ref.dart';
 import 'package:pepper_house/services/fire_auth.dart';
@@ -123,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
 
                             await locator.get<SharedRefRepo>().saveUserCredential(
                                 _emailField.text, _passwordField.text);
-
+                            await locator.get<UserController>().initUser();
                             Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                     builder: (context) =>

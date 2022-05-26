@@ -25,4 +25,14 @@ class MenuRepository {
   void deleteMenu(Menu menu) async {
     await _db.collection("menus").doc(menu.id).delete();
   }
+
+  Future<List<Menu>> getMenuByCategory(String categoryId) async{
+    print(categoryId);
+   List<Menu> snaps = await _db.collection('menus').get().then((snapsot) {
+     return snapsot.docs.map((doc) => Menu.fromDocumentSnapshot(doc)).toList();
+   }) ;
+   print(snaps.length);
+   return snaps; 
+  }
+  
 }

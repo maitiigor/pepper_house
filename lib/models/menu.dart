@@ -5,6 +5,7 @@ class Menu {
   String name;
   String description;
   String price;
+  String? categoryMenuId;
   String imageUrl;
   Timestamp createdAt;
   Timestamp updatedAt;
@@ -15,6 +16,7 @@ class Menu {
       required this.price,
       required this.imageUrl,
       required this.createdAt,
+      required this.categoryMenuId,
       required this.updatedAt});
   factory Menu.fromJson(Map<String, dynamic> json) {
     return Menu(
@@ -22,6 +24,7 @@ class Menu {
       name: json["name"],
       description: json["description"],
       price: json["price"],
+      categoryMenuId: json["category_menu_id"],
       imageUrl: json["image_url"],
       createdAt: json["created_at"],
       updatedAt: json["updated_at"],
@@ -32,6 +35,7 @@ class Menu {
         "name": name,
         "description": description,
         "price": price,
+        "category_menu_id": categoryMenuId,
         "image_url": imageUrl,
         "created_at": createdAt.toString(),
         "update_at": createdAt.toString()
@@ -42,6 +46,7 @@ class Menu {
         name = doc.data()!["name"],
         description = doc.data()!["description"],
         price = doc.data()!["price"],
+        categoryMenuId = doc.data()!["category_menu_id"],
         imageUrl = doc.data()!["image_url"],
         createdAt = doc.data()!["created_at"],
         updatedAt = doc.data()!["updated_at"];

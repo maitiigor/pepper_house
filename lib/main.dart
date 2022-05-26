@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pepper_house/locator.dart';
 import 'package:pepper_house/repository/cart_repo.dart';
+import 'package:pepper_house/repository/menu_category_repo.dart';
 import 'package:pepper_house/repository/order_detail_repo.dart';
 import 'package:pepper_house/repository/order_repo.dart';
 import 'package:pepper_house/screen/getstarted.dart';
@@ -22,6 +23,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CartRepo()),
         ChangeNotifierProvider(create: (_) => OrderRepository()),
+        ChangeNotifierProvider(create: (_) => MenuCategoryRepository()),
       ],
       child: const MyApp(),
     ),

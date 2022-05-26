@@ -6,6 +6,7 @@ import 'package:pepper_house/screen/dashboard.dart';
 import 'package:pepper_house/screen/login.dart';
 import 'package:pepper_house/services/fire_auth.dart';
 
+import 'controller/user_controller.dart';
 import 'main.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -47,6 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                   password: password,
                                   context: context);
       if (status == AuthResultStatus.successful) {
+        await locator.get<UserController>().initUser();
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) =>
             const DashboardPage()

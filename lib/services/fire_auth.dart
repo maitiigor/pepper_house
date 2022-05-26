@@ -84,8 +84,7 @@ class FireAuth {
   Future<UserModel> getUser() async {
     var authUser = _auth.currentUser!;
     DocumentSnapshot<Map<String, dynamic>> doc = await _db.collection('users').doc(authUser.uid).get();
- 
-    
+
     return UserModel.fromDocumentSnapshot(doc);
   }
 

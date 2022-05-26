@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:pepper_house/controller/user_controller.dart';
 import 'package:pepper_house/repository/cart_repo.dart';
+import 'package:pepper_house/repository/menu_category_repo.dart';
 import 'package:pepper_house/repository/menu_repo.dart';
 import 'package:pepper_house/repository/order_repo.dart';
 import 'package:pepper_house/repository/shared_ref.dart';
@@ -14,5 +15,6 @@ void setUpServices() {
   locator.registerSingleton<SharedRefRepo>(SharedRefRepo());
   locator.registerSingleton<CartRepo>(CartRepo());
   locator.registerSingleton<OrderRepository>(OrderRepository());
+  locator.registerSingleton<MenuCategoryRepository>(MenuCategoryRepository());
    
 }
